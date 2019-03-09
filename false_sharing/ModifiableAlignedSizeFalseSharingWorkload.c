@@ -54,7 +54,7 @@ void* thread_func_2(void* param)
 	struct data* d = (struct data*)param;
 	for (int i=0; i<MAX_NUM; ++i)
 	{
-		++d->a;
+		++d->b;
 	}
 	gettimeofday(&end, NULL);
 	tb = ((int)(end.tv_sec-start.tv_sec)*1000000+(int)(end.tv_usec-start.tv_usec));
