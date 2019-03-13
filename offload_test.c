@@ -3,7 +3,7 @@
 #include <time.h>
 #include <pthread.h>
 #define  PACK  __attribute__  ((packed))
-typedef int cache_line_int __attribute__((aligned(0)));
+typedef int cache_line_int __attribute__((aligned(0x1000)));
 // FS: [page__pad]	fast
 // NONFS: [page]	slow
 #define NONFS
@@ -26,12 +26,29 @@ struct data
 int ta,tb;
 int done1,done2;
 
-#define MAX_NUM 500000000
+#define MAX_NUM 5000
+int padding[0x1000];
+struct timeval start, end;
+int padding[0x1000];
+//struct timeval start2, end2;
 
+	FILE* fp;
+char buff[100];
 void* thread_func_1(void* param)
 {
 	//while (1);
-	struct timeval start, end;
+	fp = fopen("/home/ub/workload/input.txt","r");
+	if (fp == NULL)
+	{
+		printf("Failed open file\n");
+	}
+	else
+	{
+		fread(buff,0xe,1,fp);
+		printf("%s\n",buff);
+	}
+	fclose(fp);
+	write(1,"wow\n",5);
 	gettimeofday(&start, NULL);
 	struct data* d = (struct data*)param;
 	for (int i=0; i<MAX_NUM; ++i)
@@ -43,21 +60,24 @@ void* thread_func_1(void* param)
 	ta = ((int)(end.tv_sec-start.tv_sec)*1000000+(int)(end.tv_usec-start.tv_usec));
 	//while (1);
 	done1=1;
+
 	return NULL;
 }
 
 void* thread_func_2(void* param)
 {
 	//while (1);
-	struct timeval start, end;
-	gettimeofday(&start, NULL);
+char buf[]="test out\n";
+	printf(buf);
+	//struct timeval start, end;
+	//gettimeofday(&start2, NULL);
 	struct data* d = (struct data*)param;
 	for (int i=0; i<MAX_NUM; ++i)
 	{
 		++d->b;
 	}
-	gettimeofday(&end, NULL);
-	tb = ((int)(end.tv_sec-start.tv_sec)*1000000+(int)(end.tv_usec-start.tv_usec));
+	//gettimeofday(&end2, NULL);
+	//tb = ((int)(end2.tv_sec-start2.tv_sec)*1000000+(int)(end2.tv_usec-start2.tv_usec));
 	//printf("thread 2, time=%d\n", (int)(end.tv_sec-start.tv_sec)*1000000+(int)(end.tv_usec-start.tv_usec));
 	//while (1);
 	done2=1;
@@ -72,6 +92,17 @@ int main()
 	pthread_t t1, t2;
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
+	fp = fopen("/home/ub/workload/input.txt","r");
+	if (fp == NULL)
+	{
+		printf("Failed open file\n");
+	}
+	else
+	{
+		fread(buff,0xe,1,fp);
+		printf("%s\n",buff);
+	}
+	fclose(fp);
 	pthread_create(&t1, NULL, thread_func_1, &d);
 	pthread_create(&t2, NULL, thread_func_2, &d);
 	//pthread_join(t1, NULL);
