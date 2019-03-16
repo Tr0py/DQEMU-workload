@@ -2,8 +2,9 @@
 #include <sys/time.h>
 #include <time.h>
 #include <pthread.h>
+#include <unistd.h>
 #define  PACK  __attribute__  ((packed))
-typedef int cache_line_int __attribute__((aligned(0x1000)));
+typedef int cache_line_int __attribute__((aligned(0)));
 // FS: [page__pad]	fast
 // NONFS: [page]	slow
 #define NONFS
@@ -26,7 +27,7 @@ struct data
 int ta,tb;
 int done1,done2;
 
-#define MAX_NUM 5000
+#define MAX_NUM 50000000
 int padding[0x1000];
 struct timeval start, end;
 int padding[0x1000];
@@ -56,7 +57,7 @@ void* thread_func_1(void* param)
 		++d->a;
 	}
 	gettimeofday(&end, NULL);
-	//printf("thread 1, time=%d\n", (int)(end.tv_sec-start.tv_sec)*1000000+(int)(end.tv_usec-start.tv_usec));
+	printf("thread 1, time=%d\n", (int)(end.tv_sec-start.tv_sec)*1000000+(int)(end.tv_usec-start.tv_usec));
 	ta = ((int)(end.tv_sec-start.tv_sec)*1000000+(int)(end.tv_usec-start.tv_usec));
 	//while (1);
 	done1=1;
@@ -69,19 +70,26 @@ void* thread_func_2(void* param)
 	//while (1);
 char buf[]="test out\n";
 	printf(buf);
-	//struct timeval start, end;
-	//gettimeofday(&start2, NULL);
+	struct timeval start, end;
+	gettimeofday(&start, NULL);
 	struct data* d = (struct data*)param;
 	for (int i=0; i<MAX_NUM; ++i)
 	{
 		++d->b;
 	}
-	//gettimeofday(&end2, NULL);
-	//tb = ((int)(end2.tv_sec-start2.tv_sec)*1000000+(int)(end2.tv_usec-start2.tv_usec));
-	//printf("thread 2, time=%d\n", (int)(end.tv_sec-start.tv_sec)*1000000+(int)(end.tv_usec-start.tv_usec));
+	gettimeofday(&end, NULL);
+	tb = ((int)(end.tv_sec-start.tv_sec)*1000000+(int)(end.tv_usec-start.tv_usec));
+	printf("thread 2, time=%d\n", (int)(end.tv_sec-start.tv_sec)*1000000+(int)(end.tv_usec-start.tv_usec));
 	//while (1);
 	done2=1;
 	return NULL;
+}
+
+void* thread_join_test()
+{
+	sleep(1);
+	printf("wow!!!\n");
+	return;
 }
 
 int main()
@@ -103,11 +111,16 @@ int main()
 		printf("%s\n",buff);
 	}
 	fclose(fp);
+	//sleep(0.05);
+	//pthread_create(&t1, NULL, thread_join_test, NULL);
+	//pthread_join(t1, NULL);
+	//printf("You've done it!\n");
 	pthread_create(&t1, NULL, thread_func_1, &d);
 	pthread_create(&t2, NULL, thread_func_2, &d);
-	//pthread_join(t1, NULL);
-	//pthread_join(t2, NULL);
-	while (done1 == 0 || done2 == 0);
+	sleep(2);
+	pthread_join(t1, NULL);
+	pthread_join(t2, NULL);
+	
 	gettimeofday(&end, NULL);
 	printf("main time=%fms\n", ((float)(end.tv_sec-start.tv_sec)*1000000+(float)(end.tv_usec-start.tv_usec))/1000);
 	printf("ta: %d\ntb: %d\n",ta,tb);
