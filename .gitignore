@@ -3,3 +3,5 @@
 *.o
 *.s
 *.swp
+blackscholes_workload/in_10M.txt.bak
+blackscholes_workload/in_10M.txt

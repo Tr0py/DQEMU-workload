@@ -95,6 +95,10 @@ void* thread_join_test()
 int main()
 {
 	
+	int testa = 100;
+	printf("a: %d\n", testa);
+	char testbuf[] = "this is my test\n";
+	write(1, testbuf, sizeof(testbuf));
 	struct data d = {a:0, b:0};
 	printf("sizeof(data) : %d\n", sizeof(struct data));
 	pthread_t t1, t2;
